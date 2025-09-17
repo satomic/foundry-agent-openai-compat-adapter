@@ -1,0 +1,14 @@
+# Core web framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+# Azure AI and authentication
+azure-ai-projects>=1.0.0b1
+azure-identity>=1.15.0
+
+# Configuration and utilities  
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+
+# Optional development dependencies
+requests>=2.31.0  # For testing scripts
