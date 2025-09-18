@@ -1,6 +1,5 @@
 import requests
 import json
-import sys
 
 def test_streaming_response():
     """Test streaming chat completion"""

@@ -1,5 +1,4 @@
 import requests
-import json
 
 # Example usage of the OpenAI-compatible adapter
 def test_chat_completion():
