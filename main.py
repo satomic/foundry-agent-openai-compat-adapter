@@ -1,6 +1,5 @@
 import os
-import sys
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
@@ -15,6 +14,7 @@ from azure.ai.projects import AIProjectClient
 from azure.identity import ClientSecretCredential
 from azure.ai.agents.models import ListSortOrder
 from dotenv import load_dotenv
+import re
 
 # Load environment variables
 load_dotenv()
@@ -235,26 +235,27 @@ class FoundryAgentAdapter:
             )
             yield f"data: {json.dumps(first_chunk.model_dump())}\n\n"
 
-            # Stream content in small chunks
-            words = content.split()
-            for i, word in enumerate(words):
-                chunk_content = word + (" " if i < len(words) - 1 else "")
+            # Stream content in small chunks while preserving whitespace and newlines
+            # Split by whitespace but keep the whitespace characters
+            tokens = re.split(r'(\s+)', content)
+            
+            for i, token in enumerate(tokens):
+                if token:  # Skip empty tokens
+                    chunk = ChatCompletionStreamResponse(
+                        id=request_id,
+                        created=created,
+                        model=request.model,
+                        choices=[
+                            StreamChoice(
+                                index=0,
+                                delta=Delta(content=token),
+                                finish_reason=None
+                            )
+                        ]
+                    )
 
-                chunk = ChatCompletionStreamResponse(
-                    id=request_id,
-                    created=created,
-                    model=request.model,
-                    choices=[
-                        StreamChoice(
-                            index=0,
-                            delta=Delta(content=chunk_content),
-                            finish_reason=None
-                        )
-                    ]
-                )
-
-                yield f"data: {json.dumps(chunk.model_dump())}\n\n"
-                await asyncio.sleep(0.05)  # Small delay to simulate streaming
+                    yield f"data: {json.dumps(chunk.model_dump())}\n\n"
+                    await asyncio.sleep(0.05)  # Small delay to simulate streaming
 
             # Final chunk with finish_reason
             final_chunk = ChatCompletionStreamResponse(
