@@ -579,7 +579,7 @@ async def list_models():
         "object": "list",
         "data": [
             {
-                "id": "foundry-agent-model",
+                "id": "gpt-4o-enterprise",
                 "object": "model",
                 "created": int(datetime.now().timestamp()),
                 "owned_by": "foundry"
